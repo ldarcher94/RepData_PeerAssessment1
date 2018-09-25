@@ -4,7 +4,8 @@ output:
   html_document:
     keep_md: true
 ---
-```{r}
+
+```r
 echo = TRUE
 ```
 
@@ -14,7 +15,8 @@ Here, we check for the presence of the data folder and data set,
 creating/unzipping if necessary, before loading the data into the environment 
 using read.csv. The date column is converted to the date class. 
 
-```{r}
+
+```r
 # Check if data folder exists
 if(!dir.exists('data/')) {
         dir.create('data/')
@@ -32,13 +34,41 @@ steps.data$date <- as.Date(steps.data$date, format = '%Y-%m-%d')
 str(steps.data)
 ```
 
+```
+## 'data.frame':	17568 obs. of  3 variables:
+##  $ steps   : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ date    : Date, format: "2012-10-01" "2012-10-01" ...
+##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
+```
+
 
 ## What is mean total number of steps taken per day?
 
 Functions from the dplyr package are used to group the data by date, and find
 the total sum of steps for each day. This data is represented in a histogram:
-```{r}
+
+```r
 library(dplyr)
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 # Calculate total steps per day
 total.steps <- 
         steps.data %>%
@@ -54,11 +84,25 @@ hist(total.steps$total.steps,
      breaks = seq(0, 25000, by = 2500))
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
 The mean and median can then be calculated from the total.steps data frame.
 
-```{r}
+
+```r
 mean(total.steps$total.steps)
+```
+
+```
+## [1] 9354.23
+```
+
+```r
 median(total.steps$total.steps)
+```
+
+```
+## [1] 10395
 ```
 
 ## What is the average daily activity pattern?
@@ -66,7 +110,8 @@ median(total.steps$total.steps)
 The average steps for each interval can be calculated using the group_by and 
 summarise functions from dplyr. The resulting data frame is then used to produce
 a time series plot of daily activity, on average across all days.
-```{r}
+
+```r
 # Calculate average steps per 5 minute interval
 avg.interval.steps <-
         steps.data %>%
@@ -82,21 +127,33 @@ plot(avg.interval.steps,
      ylab = 'Number of Steps')
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
+
 Below, the interval which contains the highest average number of steps per day
 is calculated and shown.
 
-```{r}
+
+```r
 # which.max function used to find position of highest average steps.
 max.steps <- which.max(avg.interval.steps$mean.steps)
 avg.interval.steps[max.steps, ]$interval
+```
+
+```
+## [1] 835
 ```
 
 ## Imputing missing values
 
 The sum and is.na functions are initially used to calculate and report the 
 number of missing values in the dataset. 
-```{r}
+
+```r
 sum(is.na(steps.data))
+```
+
+```
+## [1] 2304
 ```
 
 To account for missing values in the dataset, any NA values are replaced with 
@@ -104,7 +161,8 @@ the average number of steps for that interval, calculated earlier. A new data
 set is created using the transform function, along with ifelse inside the
 function call.
 
-```{r}
+
+```r
 # New data set with NA values replaced by mean
 full.steps.data <- transform(steps.data, steps = ifelse(is.na(steps.data$steps),
                                              yes = avg.interval.steps$mean.steps,
@@ -114,7 +172,8 @@ full.steps.data <- transform(steps.data, steps = ifelse(is.na(steps.data$steps),
 The total steps per day are re-calculated using the new data set with imputed 
 values. 
 
-```{r}
+
+```r
 # Calculate total steps again using new data set
 total.steps.full <-
         full.steps.data %>%
@@ -129,11 +188,25 @@ hist(total.steps.full$total.steps,
      breaks = seq(0, 25000, by = 2500))
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
+
 The mean and median values for the new data set
 
-```{r}
+
+```r
 mean(total.steps.full$total.steps)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(total.steps.full$total.steps)
+```
+
+```
+## [1] 10766.19
 ```
 
 The major difference between the adjusted histogram and the original is in the 
@@ -150,7 +223,8 @@ A factor variable of weekday or weekend is created and added to the data set
 under column heading 'wDay', using the weekdays function and a vector containing
 weekday names.
 
-```{r}
+
+```r
 # character vector to hold weekday names
 weekdays1 <- c('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday')
 
@@ -164,7 +238,8 @@ The average daily activity through weekdays and weekends can now be compared
 by subsetting the data based on weekend or weekday in the 'wDay' column, 
 grouping by interval and calculating the mean across the values. 
 
-```{r}
+
+```r
 # Weekday and weekend means per interval
 avg.weekday <-
         full.steps.data %>%
@@ -183,8 +258,8 @@ The daily activity is then plotted as a line graph using the base R plotting
 system. The mfrow parameter is altered to allow both plots to be shown in the 
 same image.
 
-```{r}
 
+```r
 par(mfrow = c(2, 1))
 
 plot(avg.weekday,
@@ -200,3 +275,5 @@ plot(avg.weekend,
      xlab = 'Interval',
      ylab = 'Number of Steps')
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
